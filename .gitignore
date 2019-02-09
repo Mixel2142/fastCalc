@@ -1,0 +1,10 @@
+*
+
+!.gitignore
+!calculator.componentinfo.xml
+!calculator.cppproj
+!main.cpp
+!New Project.pdsprj
+!calculator.atsln
+
+!*/
