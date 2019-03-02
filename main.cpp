@@ -28,7 +28,7 @@ bool writeTo = NumOne;
 bool inf = false;
 int32_t numberOne = 0;
 int32_t numberTwo = 0;
-
+int32_t belowZero = 0 ;
 
 #define firstZnakoMesto	 0b00000001
 #define secondZnakoMesto 0b00000010
@@ -128,7 +128,7 @@ void makeDisplayValue()
 	dispVal[1] = 0;
 	dispVal[2] = 0;
 	dispVal[3] = 0b00111111;
-
+	
 	if(writeTo)//NumOne
 	{
 		if(inf)
@@ -186,6 +186,16 @@ void makeDisplayValue()
 		{
 			dispVal[3-j] = setPortD(numberTwo/pow_dec(10,j)%10);
 		}
+	}
+
+
+	if(belowZero != 0)
+	{
+		//for(uint8_t j = 0; j < getLength(belowZero); j++)
+		//{
+			//dispVal[3-j] = setPortD(belowZero/pow_dec(10,j)%10);
+		//}
+		dispVal[0] = setPortD(belowZero);
 	}
 }
 
@@ -396,7 +406,11 @@ void Equ_f(uint8_t* sign,int32_t* number)
 			numberOne = 0;
 			numberTwo = 0;
 		}
-		else numberOne /= numberTwo;
+		else 
+		{
+			belowZero = 5 % 2 ;numberTwo;
+			numberOne /= numberTwo;
+		}
 		break;
 
 		default:
