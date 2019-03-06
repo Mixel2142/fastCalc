@@ -28,7 +28,6 @@ bool writeTo = NumOne;
 bool inf = false;
 int32_t numberOne = 0;
 int32_t numberTwo = 0;
-int32_t belowZero = 0 ;
 
 #define firstZnakoMesto	 0b00000001
 #define secondZnakoMesto 0b00000010
@@ -82,7 +81,7 @@ bool isKeyPres(uint8_t key)
 	return (PINB == key);
 }
 
-uint8_t setPortD(uint8_t num)
+uint8_t toValPortD(uint8_t num)
 {
 	switch (num)
 	{
@@ -146,15 +145,15 @@ void makeDisplayValue()
 				{
 					for(uint8_t j = 0; j < getLength(numberOne); j++)
 					{
-						dispVal[3-j] = setPortD(mod(numberOne/pow_dec(10,j)%10));
+						dispVal[3-j] = toValPortD(mod(numberOne/pow_dec(10,j)%10));
 					}
 					dispVal[3-getLength(numberOne)] = minus;
 				}
 				else
 				{
-					dispVal[3] = setPortD(getLength(numberOne)-1);
+					dispVal[3] = toValPortD(getLength(numberOne)-1);
 					dispVal[2] = e;
-					dispVal[1] = setPortD(mod(numberOne/pow_dec(10,getLength(numberOne)-1)%10));
+					dispVal[1] = toValPortD(mod(numberOne/pow_dec(10,getLength(numberOne)-1)%10));
 					dispVal[0] = minus;
 				}
 			}//OK
@@ -166,15 +165,15 @@ void makeDisplayValue()
 				
 					for(uint8_t j = 0; j < getLength(numberOne); j++)
 					{
-						dispVal[3-j] = setPortD(numberOne/pow_dec(10,j)%10);
+						dispVal[3-j] = toValPortD(numberOne/pow_dec(10,j)%10);
 					}
 				
 				}
 				else
 				{	
-					dispVal[3] = setPortD(getLength(numberOne)-1);
+					dispVal[3] = toValPortD(getLength(numberOne)-1);
 					dispVal[2] = e;
-					dispVal[1] = setPortD(numberOne/pow_dec(10,getLength(numberOne)-1)%10);
+					dispVal[1] = toValPortD(numberOne/pow_dec(10,getLength(numberOne)-1)%10);
 					dispVal[0] = 0;
 				}
 			}//OK
@@ -184,19 +183,10 @@ void makeDisplayValue()
 	{
 		for(uint8_t j = 0; j < getLength(numberTwo); j++)
 		{
-			dispVal[3-j] = setPortD(numberTwo/pow_dec(10,j)%10);
+			dispVal[3-j] = toValPortD(numberTwo/pow_dec(10,j)%10);
 		}
 	}
 
-
-	if(belowZero != 0)
-	{
-		//for(uint8_t j = 0; j < getLength(belowZero); j++)
-		//{
-			//dispVal[3-j] = setPortD(belowZero/pow_dec(10,j)%10);
-		//}
-		dispVal[0] = setPortD(belowZero);
-	}
 }
 
 uint8_t coder(uint8_t code)
@@ -206,15 +196,23 @@ uint8_t coder(uint8_t code)
 	return (code & 0b00110011) + ((code >> 2) & 0b00110011);
 }
 
+inline void DrawZnakomesto()
+{
+	go2PreviusZnakoMesto();
+
+	if(currentZnakoMesto < firstZnakoMesto) 
+		currentZnakoMesto = fourthZnakoMesto; // поочередное открывание ключей
+
+	PORTD = dispVal[3-coder(PORTB)];
+}
+
 ISR(TIMER0_COMPA_vect)//Прерывание по сравнению
 {
 	if(power)
 	{	
-		go2PreviusZnakoMesto();
-		if(currentZnakoMesto < firstZnakoMesto) currentZnakoMesto = fourthZnakoMesto; // поочередное открывание ключей
 		
-		PORTD = dispVal[3-coder(PORTB)];
-		
+		DrawZnakomesto();
+
 		if(isKeyPres())
 		{
 			keyCounter++;
@@ -408,7 +406,6 @@ void Equ_f(uint8_t* sign,int32_t* number)
 		}
 		else 
 		{
-			belowZero = 5 % 2 ;numberTwo;
 			numberOne /= numberTwo;
 		}
 		break;
