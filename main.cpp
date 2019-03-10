@@ -81,33 +81,22 @@ bool isKeyPres(uint8_t key)
 	return (PINB == key);
 }
 
+const uint8_t cyph[10] = {
+	0b00111111, // 0
+	0b00000110,
+	0b01011011,
+	0b01001111,
+	0b01100110,
+	0b01101101,
+	0b01111101,
+	0b00100111,
+	0b01111111,
+	0b01101111  // 9
+};
+
 uint8_t toValPortD(uint8_t num)
 {
-	switch (num)
-	{
-		case 0:
-			return	0b00111111;
-		case 1:
-			return	0b00000110;
-		case 2:
-			return	0b01011011;
-		case 3:
-			return	0b01001111;
-		case 4:
-			return	0b01100110;
-		case 5:
-			return	0b01101101;
-		case 6:
-			return	0b01111101;
-		case 7:
-			return	0b00100111;
-		case 8:
-			return	0b01111111;
-		case 9:
-			return	0b01101111;
-		default:
-			return	0b00000001;
-	}
+	return( cyph[ num ] );
 }
 
 int32_t pow_dec(int32_t num, uint8_t pw)
