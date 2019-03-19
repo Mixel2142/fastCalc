@@ -11,8 +11,9 @@ const uint8_t On_C = 0b00011000;
 #define Mul  0b01000001
 #define Equ  0b00010010
 
+bool isCanPressKey = true; //разрешает обработку кнопки
 bool pressKey = false; //ничего не нажато
-const uint8_t keyDelay = 2;//60;   //кол-во итераций в ISR которое нужно для срабатывания нажатия клавиши
+const uint8_t keyDelay = 5;//60;   //кол-во итераций в ISR которое нужно для срабатывания нажатия клавиши
 uint8_t keyCounter = 0;  //счётчик кол-ва нажатия в ISR
 
 uint16_t powerCounter = 0;
@@ -35,7 +36,6 @@ int32_t numberTwo = 0;
 #define fourthZnakoMesto 0b00001000
 
 inline void go2PreviusZnakoMesto(){	PORTB = PORTB >> 1;} 
-
 #define currentZnakoMesto PORTB
 
 #define i 0b00000100
@@ -176,6 +176,13 @@ void makeDisplayValue()
 		}
 	}
 
+	/*
+	uint16_t aa = 5;
+	uint16_t ba = 2;
+	uint8_t ca = aa % ba;
+	dispVal[1] = toValPortD(ca);
+	*///ответ не 5, а 1 
+
 }
 
 uint8_t coder(uint8_t code)
@@ -204,11 +211,19 @@ ISR(TIMER0_COMPA_vect)//Прерывание по сравнению
 
 		if(isKeyPres())
 		{
-			keyCounter++;
+			
+			if(isCanPressKey)pressKey = true;
 			powerCounter = 0;
 		}
 		else
 		{
+			keyCounter++;
+			if(keyCounter > keyDelay)
+			{
+				isCanPressKey = true;
+				keyCounter = 0;
+			}
+
 			powerCounter++;
 			if(powerCounter > powerStop)
 			{
@@ -220,11 +235,6 @@ ISR(TIMER0_COMPA_vect)//Прерывание по сравнению
 			}
 		}
 
-		if(keyCounter > keyDelay)
-		{
-			pressKey = true; 
-			keyCounter = 0;
-		}
 	}
 	else
 	{
@@ -323,7 +333,6 @@ void Plus_f(uint8_t* sign,int32_t* number)
 	dispVal[1] = l;
 	dispVal[2] = u;
 	dispVal[3] = s;
-	pressKey = false;
 	_delay_ms(delaySign);
 }
 
@@ -335,7 +344,6 @@ void Sub_f(uint8_t* sign,int32_t* number)
 	dispVal[1] = s;
 	dispVal[2] = u;
 	dispVal[3] = b;
-	pressKey = false;
 	_delay_ms(delaySign);
 }
 
@@ -347,7 +355,6 @@ void Did_f(uint8_t* sign,int32_t* number)
 	dispVal[1] = d;
 	dispVal[2] = i;
 	dispVal[3] = d;
-	pressKey = false;
 	_delay_ms(delaySign);
 }
 
@@ -359,7 +366,6 @@ void Mul_f(uint8_t* sign,int32_t* number)
 	dispVal[1] = m;
 	dispVal[2] = u;
 	dispVal[3] = l;
-	pressKey = false;
 	_delay_ms(delaySign);
 }
 
@@ -370,7 +376,6 @@ void Equ_f(uint8_t* sign,int32_t* number)
 	dispVal[1] = e;
 	dispVal[2] = q;
 	dispVal[3] = u;
-	pressKey = false;
 	_delay_ms(delaySign);
 	switch (*sign)
 	{
@@ -449,6 +454,7 @@ int main()
 					keyBoard[getColumn()][getRow()]( &sign, &numberTwo);
 				}
 				pressKey = false;
+
 				if(numberTwo > 9999)numberTwo %= 10000;
 				makeDisplayValue();
 				
